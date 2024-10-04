@@ -3,7 +3,7 @@
 #include <string.h>
 int size = 30;
 
-int getLastChar(char *str){
+int getLastCharIndex(char *str){
     for(int i = 0; i < size; ++i){
         if(*(str+i) != '\0')
         {
@@ -18,7 +18,7 @@ int getLastChar(char *str){
 void reverseString(char *str) {
 
     char *start = str;                      // Pointer to the start of the string
-    char *end = str + getLastChar(str) - 1; // Pointer to the end of the string
+    char *end = str + getLastCharIndex(str) - 1; // Pointer to the end of the string
 
     while (start < end) {
         // Swap the characters
