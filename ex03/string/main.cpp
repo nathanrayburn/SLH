@@ -1,11 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+int size = 30;
 
+int getLastChar(char *str){
+    for(int i = 0; i < size; ++i){
+        if(*(str+i) != '\0')
+        {
+            continue;
+        }else{
+            return i-1;
+        }
+    }
+    return 0;
+}
 
 void reverseString(char *str) {
-    char *start = str;                // Pointer to the start of the string
-    char *end = str + strlen(str) - 1; // Pointer to the end of the string
+
+    char *start = str;                      // Pointer to the start of the string
+    char *end = str + getLastChar(str) - 1; // Pointer to the end of the string
 
     while (start < end) {
         // Swap the characters
@@ -20,7 +33,7 @@ void reverseString(char *str) {
 }
 
 int main() {
-    int size = 30;
+
 
     // Allocate buffer for the string
     char *stringBuffer = (char *)malloc(size * sizeof(char));
