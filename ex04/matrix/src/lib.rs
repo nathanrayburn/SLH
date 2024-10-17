@@ -1,5 +1,7 @@
 mod util;
 
+use std::vec;
+
 use util::Number;
 
 #[derive(Debug,PartialEq,Eq)]
@@ -49,7 +51,11 @@ pub fn empty<T: Number>(shape: Shape) -> Matrix<T> {
 }
 
 pub fn identity<T: Number> (n: usize) -> Matrix<T> {
-    todo!()
+    let mut m: Vec<Vec<T>> = vec![vec![0.into(); n]; n];
+    for i in 0..n{
+        m[i][i] = 1.into();
+    }
+    Matrix(m)
 }
 
 pub fn matsum<T: Number>(a: &Matrix<T>, b: &Matrix<T>) -> Result<Matrix<T>, ShapeError> {
