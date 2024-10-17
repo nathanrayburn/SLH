@@ -18,11 +18,30 @@ pub enum ShapeError {
 }
 
 pub fn shape<T: Number>(m: &Vec<Vec<T>>) -> Option<Shape> {
-    todo!()
+
+    if m.is_empty() || m[0].is_empty() {
+        return None;
+    }
+
+    let size = m[0].len();
+    for line in m.iter(){
+        if(line.len() != size){
+            return None;
+        }
+    }
+    
+    Some(Shape {
+        rows: m.len(),
+        columns: size,
+    })
 }
 
 pub fn check<T: Number>(m: Vec<Vec<T>>) -> Result<Matrix<T>, ShapeError> {
-    todo!()
+    if (shape(&m) == None){
+        return Err(ShapeError::MalformedData)
+    }
+
+    Ok(Matrix(m))
 }
 
 pub fn empty<T: Number>(shape: Shape) -> Matrix<T> {
