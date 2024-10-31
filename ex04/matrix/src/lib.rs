@@ -39,7 +39,7 @@ pub fn shape<T: Number>(m: &Vec<Vec<T>>) -> Option<Shape> {
 }
 
 pub fn check<T: Number>(m: Vec<Vec<T>>) -> Result<Matrix<T>, ShapeError> {
-    if (shape(&m) == None){
+    if shape(&m) == None{
         return Err(ShapeError::MalformedData)
     }
 
@@ -51,6 +51,9 @@ pub fn empty<T: Number>(shape: Shape) -> Matrix<T> {
 }
 
 pub fn identity<T: Number> (n: usize) -> Matrix<T> {
+    if  n == 0 {
+        panic!("Identity matrix of size 0 is not allowed");
+    }
     let mut m: Vec<Vec<T>> = vec![vec![0.into(); n]; n];
     for i in 0..n{
         m[i][i] = 1.into();
@@ -59,21 +62,108 @@ pub fn identity<T: Number> (n: usize) -> Matrix<T> {
 }
 
 pub fn matsum<T: Number>(a: &Matrix<T>, b: &Matrix<T>) -> Result<Matrix<T>, ShapeError> {
-    todo!()
+    check(a.0.clone())?;
+    check(b.0.clone())?;
+
+    if shape(&a.0) != shape(&b.0) {
+        return Err(ShapeError::IncompatibleShapes(shape(&a.0).unwrap(), shape(&b.0).unwrap()));
+    }
+
+    let shape = shape(&a.0).unwrap();
+    let n = shape.rows;
+    let mut r: Vec<Vec<T>> = vec![vec![0.into(); shape.columns]; n];
+
+    for i in 0..shape.rows {
+        for j in 0..shape.columns {
+            r[i][j] = a.0[i][j] + b.0[i][j];
+        }
+    }
+
+    Ok(Matrix(r))
 }
 
 pub fn matmul<T: Number>(a: &Matrix<T>, b: &Matrix<T>) -> Result<Matrix<T>, ShapeError> {
-    todo!()
+    check(a.0.clone())?;
+    check(b.0.clone())?;
+
+    if shape(&a.0).unwrap().columns != shape(&b.0).unwrap().rows {
+        return Err(ShapeError::IncompatibleShapes(shape(&a.0).unwrap(), shape(&b.0).unwrap()));
+    }
+
+    let shape_a = shape(&a.0).unwrap();
+    let shape_b = shape(&b.0).unwrap();
+    let n = shape_a.rows;
+    let m = shape_a.columns;
+    let p = shape_b.columns;
+
+    let mut r: Vec<Vec<T>> = vec![vec![0.into(); p]; n];
+
+    for i in 0..n {
+        for j in 0..p {
+            for k in 0..m {
+                r[i][j] += a.0[i][k] * b.0[k][j];
+            }
+        }
+    }
+
+    Ok(Matrix(r))
 }
 
 pub fn matsum_inline<T: Number>(a: &mut Matrix<T>, b: &Matrix<T>) -> Result<(), ShapeError> {
-    todo!()
+    check(a.0.clone())?;
+    check(b.0.clone())?;
+
+    if shape(&a.0) != shape(&b.0) {
+        return Err(ShapeError::IncompatibleShapes(shape(&a.0).unwrap(), shape(&b.0).unwrap()));
+    }
+
+    let shape = shape(&a.0).unwrap();
+    let n = shape.rows;
+
+    for i in 0..n {
+        for j in 0..shape.columns {
+            a.0[i][j] += b.0[i][j];
+        }
+    }
+
+    Ok(())
 }
 
 pub fn bidi_mul<T: Number>(a: &Matrix<T>, b: &Matrix<T>) -> Result<Matrix<T>, ShapeError> {
-    todo!()
-}
+    check(a.0.clone())?;
+    check(b.0.clone())?;
 
+    let shape_a = shape(&a.0).unwrap();
+    let shape_b = shape(&b.0).unwrap();
+
+    if shape_a.columns == shape_b.rows {
+        // Standard matrix multiplication
+        let n = shape_a.rows;
+        let m = shape_a.columns;
+        let p = shape_b.columns;
+
+        let mut r: Vec<Vec<T>> = vec![vec![0.into(); p]; n];
+        for i in 0..n {
+            for j in 0..p {
+                for k in 0..m {
+                    r[i][j] += a.0[i][k] * b.0[k][j];
+                }
+            }
+        }
+        Ok(Matrix(r))
+    } else if shape_a.rows == shape_b.rows && shape_a.columns == shape_b.columns {
+        // Element-wise multiplication
+        let mut r = a.0.clone();
+        for i in 0..shape_a.rows {
+            for j in 0..shape_a.columns {
+                r[i][j] *= b.0[i][j];
+            }
+        }
+        Ok(Matrix(r))
+    } else {
+        Err(ShapeError::IncompatibleShapes(shape_a, shape_b))
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -142,6 +232,7 @@ mod tests {
         let b = matrix![7;11];
         let c = matrix![2,3,5];
         let d = matrix![0,0;0,0];
+
 
         assert_eq!(bidi_mul(&a, &b), Ok(matrix![2*7 + 3*11]));
         assert_eq!(bidi_mul(&b, &a), Ok(matrix![2*7, 3*7; 2*11, 3*11]));
